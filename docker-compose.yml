@@ -1,0 +1,70 @@
+# Team deployment. Run ./setup.sh once, then: docker compose up --build -d
+# Add capacity with: docker compose up -d --scale worker=3
+
+x-app: &app
+  build: ./backend
+  env_file:
+    - path: .env
+      required: false
+  environment: &app-env
+    COUNTERSIGN_DATABASE_URL: postgresql+psycopg://countersign:${POSTGRES_PASSWORD:?Run ./setup.sh first}@postgres:5432/countersign
+    COUNTERSIGN_EMBEDDED_WORKER: "false"
+  volumes:
+    - countersign-data:/data
+  restart: unless-stopped
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: countersign
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run ./setup.sh first}
+      POSTGRES_DB: countersign
+    volumes:
+      - countersign-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U countersign -d countersign"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  migrate:
+    <<: *app
+    command: ["/srv/.venv/bin/python", "-m", "app.migrate"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      disable: true
+    restart: "no"
+
+  backend:
+    <<: *app
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  worker:
+    <<: *app
+    command: ["/srv/.venv/bin/python", "-m", "app.worker"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      disable: true
+    stop_grace_period: 20s
+
+  frontend:
+    build: ./frontend
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      # Localhost only. Put TLS in front before exposing this to a network.
+      - "127.0.0.1:8080:80"
+    restart: unless-stopped
+
+volumes:
+  countersign-data:
+  countersign-postgres:

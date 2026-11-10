@@ -1,0 +1,74 @@
+@import "tailwindcss";
+@import "@fontsource-variable/hanken-grotesk";
+@import "@fontsource-variable/jetbrains-mono";
+@import "@fontsource-variable/newsreader";
+
+@theme {
+  --font-sans: "Hanken Grotesk Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono Variable", ui-monospace, monospace;
+  --font-serif: "Newsreader Variable", ui-serif, Georgia, serif;
+
+  --color-paper: #f6f3ec;
+  --color-surface: #fffdf8;
+  --color-sunken: #efebe1;
+  --color-line: #e2ddd0;
+  --color-line-strong: #cfc8b8;
+  --color-ink: #1b1a17;
+  --color-ink-2: #55514a;
+  --color-ink-3: #827c70;
+
+  --color-moss: #2c6a4e;
+  --color-moss-soft: #e0ece3;
+  --color-gold: #a86f12;
+  --color-gold-bright: #e8b04a;
+  --color-gold-soft: #f8ecd2;
+  --color-clay: #b23f2b;
+  --color-clay-soft: #f7e3dc;
+  --color-ocean: #2f5a8f;
+  --color-ocean-soft: #e0e9f3;
+
+  --shadow-card: 0 1px 2px rgb(60 50 30 / 0.05), 0 8px 24px -16px rgb(60 50 30 / 0.18);
+  --animate-rise: rise 0.35s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  --animate-stamp: stamp 0.35s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes stamp {
+    from { opacity: 0; transform: rotate(-3deg) scale(1.35); }
+    to { opacity: 1; transform: rotate(-3deg) scale(1); }
+  }
+}
+
+html { background: var(--color-paper); color: var(--color-ink); scroll-behavior: smooth; }
+body { font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
+:focus-visible { outline: 2px solid var(--color-ocean); outline-offset: 2px; border-radius: 4px; }
+button:not(:disabled) { cursor: pointer; }
+
+/* Slowly drifting colour field behind dark hero surfaces. */
+.aurora { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.aurora::before, .aurora::after {
+  content: ""; position: absolute; border-radius: 50%;
+  animation: drift 16s ease-in-out infinite alternate;
+}
+.aurora::before {
+  width: 70%; aspect-ratio: 1; top: -55%; right: -14%;
+  background: radial-gradient(closest-side, rgb(232 176 74 / 0.38), transparent);
+}
+.aurora::after {
+  width: 62%; aspect-ratio: 1; bottom: -60%; left: -10%; animation-delay: -6s;
+  background: radial-gradient(closest-side, rgb(44 130 92 / 0.5), transparent);
+}
+@keyframes drift {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(-9%, 12%, 0) scale(1.18); }
+}
+.dot-grid {
+  background-image: radial-gradient(rgb(246 243 236 / 0.09) 1px, transparent 1px);
+  background-size: 26px 26px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
