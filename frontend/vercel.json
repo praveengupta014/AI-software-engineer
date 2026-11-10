@@ -7,7 +7,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://YOUR-BACKEND-URL/api/:path*"
+      "destination": "https://rare-dedication-production-0e46.up.railway.app/api/:path*"
     },
     {
       "source": "/(.*)",
